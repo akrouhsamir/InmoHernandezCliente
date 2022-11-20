@@ -1,0 +1,67 @@
+.root{
+    -fx-background-color: white;
+
+}
+.label{
+    -fx-text-fill: #4e4f4f;
+}
+
+.table-view {
+    -fx-background-color: transparent;
+}
+
+.table-cell{
+    -fx-padding: 15px;
+    -fx-font-size: 14px ;
+}
+
+.table-view .column-header-background .filler {
+    -fx-background-color: transparent;
+}
+
+.table-view .corner {
+    -fx-background-color: transparent;
+}
+
+.table-view .column-header-background{
+    -fx-background-color: #abcceb;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-border-color: #dce4eb;
+    -fx-border-style: none solid none solid;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #4e4f4f;
+    -fx-padding: 8px;
+    -fx-font-weight: normal;
+    -fx-font-size: 10pt ;
+}
+
+.button{
+    -fx-background-color: #e8f3fc;
+}
+
+.button:hover {
+    -fx-cursor: hand;
+}
+
+.text-field {
+    -fx-background-color: -fx-text-box-border, -fx-control-inner-background;
+}
+
+.combo-box{
+ -fx-background-color: transparent;
+     -fx-border-color: #dbdbdb;
+     -fx-border-style: none solid none solid;
+     -fx-border-radius: 2px;
+     -fx-text-fill: #4e4f4f;
+}
+
+
+
+.date-picker .arrow-button {
+	-fx-background-color: #e8f3fc;
+}

@@ -8,6 +8,9 @@ import com.inmohernandez.cliente.dao.LongPropertyAdapter;
 import com.inmohernandez.cliente.dao.StringPropertyAdapter;
 import javafx.beans.property.*;
 
+import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 
 public class Inmueble {
@@ -80,6 +83,11 @@ public class Inmueble {
         this.fechaPublicacion = new SimpleStringProperty(fechaPublicacion);
         this.habitaciones = new SimpleIntegerProperty(habitaciones);
         this.bannos = new SimpleIntegerProperty(bannos);
+    }
+
+    public void formatDate(){
+        String [] dts = getFechaPublicacion().split("-");
+        this.fechaPublicacion.set(dts[2]+"/"+dts[1]+"/"+dts[0]);
     }
 
     public Inmueble(String titulo){
