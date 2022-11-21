@@ -112,7 +112,7 @@
                   <Insets bottom="10.0" top="10.0" />
                </GridPane.margin>
             </Button>
-            <Button fx:id="btn_crear" mnemonicParsing="false" style="-fx-background-color: #6fb058;" text="➕" GridPane.columnIndex="2" GridPane.halignment="RIGHT">
+            <Button fx:id="btn_crear" mnemonicParsing="false" onAction="#crearInmuble" style="-fx-background-color: #6fb058;" text="➕" GridPane.columnIndex="2" GridPane.halignment="RIGHT">
                <GridPane.margin>
                   <Insets />
                </GridPane.margin>
@@ -145,7 +145,7 @@
                </padding>
             </Label>
             <TextField fx:id="tf_seleccionado" GridPane.columnIndex="1" />
-            <Button fx:id="btn_editar" maxWidth="1.7976931348623157E308" mnemonicParsing="false" style="-fx-background-color: orange;" text="✎Editar" GridPane.columnIndex="2">
+            <Button fx:id="btn_editar" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#editarInmueble" style="-fx-background-color: orange;" text="✎Editar" GridPane.columnIndex="2">
                <font>
                   <Font name="Tw Cen MT" size="16.0" />
                </font>
@@ -153,7 +153,7 @@
                   <Insets left="20.0" />
                </GridPane.margin>
             </Button>
-            <Button fx:id="btn_borrar" maxWidth="1.7976931348623157E308" mnemonicParsing="false" style="-fx-background-color: #e66363;" text="🗑Borrar" GridPane.columnIndex="3">
+            <Button fx:id="btn_borrar" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#borrarInmueble" style="-fx-background-color: #e66363;" text="🗑Borrar" GridPane.columnIndex="3">
                <font>
                   <Font name="Tw Cen MT" size="16.0" />
                </font>
@@ -190,10 +190,21 @@
             </Button>
          </children>
       </GridPane>
-      <Label fx:id="report_precio" textFill="RED" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-      <Label fx:id="report_publicacion" textFill="RED" GridPane.columnIndex="1" GridPane.rowIndex="6">
+      <Label id="report" fx:id="report_precio" textFill="RED" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+      <Label id="report" fx:id="report_publicacion" textFill="RED" GridPane.columnIndex="1" GridPane.rowIndex="6">
          <GridPane.margin>
             <Insets left="10.0" />
+         </GridPane.margin>
+      </Label>
+      <Label id="report" fx:id="report" GridPane.columnSpan="2" GridPane.rowIndex="12" GridPane.valignment="TOP">
+         <font>
+            <Font name="Tw Cen MT" size="14.0" />
+         </font>
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
+         <GridPane.margin>
+            <Insets left="30.0" top="20.0" />
          </GridPane.margin>
       </Label>
    </children>

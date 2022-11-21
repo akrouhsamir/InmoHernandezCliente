@@ -2,7 +2,9 @@ package com.inmohernandez.cliente.controllers;
 
 
 import com.google.gson.*;
+import com.inmohernandez.cliente.MainApp;
 import com.inmohernandez.cliente.models.Inmueble;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
@@ -10,9 +12,14 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyEvent;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -47,10 +54,15 @@ public class MainInmueblesController {
             btn_editar, btn_borrar;
 
     @FXML
-    Label report_precio, report_publicacion;
+    Label report_precio, report_publicacion, report;
 
     private SimpleStringProperty search,zona,precioDesde, precioHasta, publicacionDesde, publicacionHasta;
 
+    private String lastMoldInmuebleResult;
+
+    public void setLastMoldInmuebleResult(String lastMoldInmuebleResult) {
+        this.lastMoldInmuebleResult = lastMoldInmuebleResult;
+    }
 
     @FXML
     private void initialize() {
@@ -298,5 +310,43 @@ public class MainInmueblesController {
         }
     }
 
+    @FXML
+    public void crearInmuble(){
+        Stage stage = new Stage();
+        FXMLLoader fxmlLoader = new FXMLLoader(MainApp.class.getResource("mold-inmueble-view.fxml"));
+        MoldInmuebleController moldController;
+        stage.setTitle("Crear inmueble");
+        try {
+            stage.setScene(new Scene(fxmlLoader.load()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        stage.initModality(Modality.APPLICATION_MODAL);
+        moldController = fxmlLoader.getController();
+        moldController.initController("Crear","-1",stage,this);
+        stage.showAndWait();
+        if(lastMoldInmuebleResult != null){
+            showReport("Inmueble creado correctamente");
+            updateTableViewInmuebles();
+        }
+    }
+
+    @FXML
+    public void editarInmueble(){
+
+    }
+
+    @FXML
+    public void borrarInmueble(){
+
+    }
+
+    public void showReport(String msg){
+        report.setText(msg);
+        PauseTransition pause = new PauseTransition(Duration.seconds(2));
+        pause.setOnFinished(event ->
+                report.setText(""));
+        pause.play();
+    }
 
 }

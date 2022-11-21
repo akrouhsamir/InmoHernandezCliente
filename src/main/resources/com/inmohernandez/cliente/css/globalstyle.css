@@ -64,4 +64,29 @@
 
 .date-picker .arrow-button {
 	-fx-background-color: #e8f3fc;
+	    -fx-cursor: hand;
+}
+
+.spinner .increment-arrow-button{
+    -fx-background-color: #e8f3fc;
+}
+
+.spinner .decrement-arrow-button{
+    -fx-background-color: #e8f3fc;
+}
+
+.spinner .increment-arrow-button:hover{
+    -fx-cursor: hand;
+}
+
+.spinner .decrement-arrow-button:hover{
+    -fx-cursor: hand;
+}
+
+#label-required{
+    -fx-text-fill: #ff0000;
+}
+
+#report{
+    -fx-text-fill: #ff0000;
 }

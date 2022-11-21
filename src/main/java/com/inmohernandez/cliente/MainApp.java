@@ -17,6 +17,7 @@ public class MainApp extends Application {
         stage.setTitle("InmoHernandez");
         stage.setScene(scene);
         stage.show();
+
     }
 
     public static void main(String[] args) {
