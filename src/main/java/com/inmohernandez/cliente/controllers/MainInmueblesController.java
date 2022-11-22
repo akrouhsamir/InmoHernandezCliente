@@ -56,7 +56,7 @@ public class MainInmueblesController {
     @FXML
     Label report_precio, report_publicacion, report;
 
-    private SimpleStringProperty search,zona,precioDesde, precioHasta, publicacionDesde, publicacionHasta;
+    private SimpleStringProperty search,zona,precioDesde, precioHasta, publicacionDesde, publicacionHasta,seleccionado;
 
     private String lastMoldInmuebleResult;
 
@@ -72,6 +72,7 @@ public class MainInmueblesController {
         precioHasta = new SimpleStringProperty();
         publicacionDesde = new SimpleStringProperty();
         publicacionHasta = new SimpleStringProperty();
+        seleccionado = new SimpleStringProperty();
 
 
         search.bind(tf_search.textProperty());
@@ -80,7 +81,7 @@ public class MainInmueblesController {
         precioHasta.bind(tf_precio_hasta.textProperty());
         publicacionDesde.bind(date_publicacion_desde.valueProperty().asString());
         publicacionHasta.bind(date_publicacion_hasta.valueProperty().asString());
-
+        seleccionado.bind(tf_seleccionado.textProperty());
 
         initZonaComboBox();
         initFiltroPrecio();
@@ -247,9 +248,7 @@ public class MainInmueblesController {
         URL url;
         HttpURLConnection connection;
         InputStreamReader isr;
-        String rawData="",line;
         JsonArray jsonInmuebles;
-        JsonObject jsonInmueble;
         Inmueble inmueble;
 
         StringBuilder sb = new StringBuilder();
@@ -262,7 +261,6 @@ public class MainInmueblesController {
         sb.append("\"publicacion_desde\" : \""+(publicacionDesde.get().equals("null") ? "1970-01-01": publicacionDesde.get())+"\", ");
         sb.append("\"publicacion_hasta\" : \""+(publicacionHasta.get().equals("null") ? "2299-01-01": publicacionHasta.get())+"\"");
         sb.append("}");
-        System.out.println(sb.toString());
 
         try {
             url = new URL("http://localhost:8080/api/inmuebles/filtros");
@@ -323,7 +321,7 @@ public class MainInmueblesController {
         }
         stage.initModality(Modality.APPLICATION_MODAL);
         moldController = fxmlLoader.getController();
-        moldController.initController("Crear","-1",stage,this);
+        moldController.initController("Crear",null,stage,this);
         stage.showAndWait();
         if(lastMoldInmuebleResult != null){
             showReport("Inmueble creado correctamente");
@@ -333,12 +331,80 @@ public class MainInmueblesController {
 
     @FXML
     public void editarInmueble(){
+        Stage stage;
+        FXMLLoader fxmlLoader;
+        MoldInmuebleController moldController;
+        HttpURLConnection connection;
+        InputStreamReader isr;
+        JsonObject jsonInmueble;
+        Inmueble inmueble;
 
+        if(seleccionado.get().isBlank()){
+            showReport("Selecciona un inmueble.");
+        }else{
+            try {
+                connection = (HttpURLConnection) new URL("http://localhost:8080/api/inmuebles/" + seleccionado.get()).openConnection();
+                connection.setRequestMethod("GET");
+                connection.connect();
+                if (connection.getResponseCode() != 200){
+                    showReport("Inmueble no encontrado.");
+                    connection.disconnect();
+                }else{
+                    isr = new InputStreamReader(connection.getInputStream());
+                    jsonInmueble = JsonParser.parseReader(isr).getAsJsonObject();
+                    isr.close();
+                    inmueble = new Gson().fromJson(jsonInmueble, Inmueble.class);
+                    connection.disconnect();
+                    stage = new Stage();
+                    fxmlLoader = new FXMLLoader(MainApp.class.getResource("mold-inmueble-view.fxml"));
+                    stage.setTitle("Editar inmueble");
+                    try {
+                        stage.setScene(new Scene(fxmlLoader.load()));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    stage.initModality(Modality.APPLICATION_MODAL);
+                    moldController = fxmlLoader.getController();
+                    moldController.initController("Editar",inmueble,stage,this);
+                    stage.showAndWait();
+                    if(lastMoldInmuebleResult != null){
+                        showReport("Inmueble creado correctamente.");
+                        updateTableViewInmuebles();
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     @FXML
     public void borrarInmueble(){
+        FXMLLoader fxmlLoader;
+        MoldInmuebleController moldController;
+        HttpURLConnection connection;
+        InputStreamReader isr;
+        JsonObject jsonInmueble;
+        Inmueble inmueble;
 
+        if(seleccionado.get().isBlank()){
+            showReport("Selecciona un inmueble.");
+        }else{
+            try {
+                connection = (HttpURLConnection) new URL("http://localhost:8080/api/inmuebles/" + seleccionado.get()).openConnection();
+                connection.setRequestMethod("DELETE");
+                connection.connect();
+                if (connection.getResponseCode() != 200){
+                    showReport("Inmueble no encontrado.");
+                    connection.disconnect();
+                }else{
+                    updateTableViewInmuebles();
+                    showReport("Inmueble eliminado correctamente.");
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     public void showReport(String msg){

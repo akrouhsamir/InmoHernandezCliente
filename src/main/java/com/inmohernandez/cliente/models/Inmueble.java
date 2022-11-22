@@ -8,9 +8,7 @@ import com.inmohernandez.cliente.dao.LongPropertyAdapter;
 import com.inmohernandez.cliente.dao.StringPropertyAdapter;
 import javafx.beans.property.*;
 
-import java.sql.Date;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+
 
 
 public class Inmueble {
@@ -41,6 +39,8 @@ public class Inmueble {
     @Expose
     @JsonAdapter(StringPropertyAdapter.class)
     public StringProperty fechaPublicacion;
+
+
 
     @Override
     public String toString() {
@@ -83,11 +83,18 @@ public class Inmueble {
         this.fechaPublicacion = new SimpleStringProperty(fechaPublicacion);
         this.habitaciones = new SimpleIntegerProperty(habitaciones);
         this.bannos = new SimpleIntegerProperty(bannos);
+
     }
+
 
     public void formatDate(){
         String [] dts = getFechaPublicacion().split("-");
         this.fechaPublicacion.set(dts[2]+"/"+dts[1]+"/"+dts[0]);
+    }
+
+    public static String dateToSQLDate(String date){
+        String [] dts = date.split("/");
+        return dts[2]+"-"+dts[1]+"-"+  (dts[0].length() == 1? "0" + dts[0]: dts[0]);
     }
 
     public Inmueble(String titulo){
@@ -229,4 +236,6 @@ public class Inmueble {
     public void setBannos(int bannos) {
         this.bannos.set(bannos);
     }
+
+
 }

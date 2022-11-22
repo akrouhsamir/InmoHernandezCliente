@@ -3,26 +3,33 @@ package com.inmohernandez.cliente.controllers;
 import com.google.gson.*;
 import com.inmohernandez.cliente.models.Inmueble;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
+import javafx.util.converter.FormatStringConverter;
+import javafx.util.converter.NumberStringConverter;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.util.List;
 
 public class MoldInmuebleController {
     private String mode;
-    private String idInmueble;
+    private Inmueble inmueble;
     private Stage myStage;
 
     private MainInmueblesController mainController;
@@ -32,8 +39,8 @@ public class MoldInmuebleController {
     ubicacion, habitaciones, bannos, descripcion, m2, m2utiles;
 
 
-    public void initController(String mode, String idInmueble, Stage myStage, MainInmueblesController mainController){
-        this.idInmueble = idInmueble;
+    public void initController(String mode, Inmueble inmueble, Stage myStage, MainInmueblesController mainController){
+        this.inmueble = inmueble;
         this.mode = mode;
         this.myStage = myStage;
         this.mainController = mainController;
@@ -43,6 +50,9 @@ public class MoldInmuebleController {
         }else{
             btn_mod.setText("Editar");
         }
+
+
+
 
         titulo = new SimpleStringProperty();
         precio = new SimpleStringProperty();
@@ -57,7 +67,7 @@ public class MoldInmuebleController {
 
         titulo.bind(tf_titulo.textProperty());
         precio.bind(tf_precio.textProperty());
-        publicacion.bind(date_publicacion.valueProperty().asString());
+        publicacion.bind(date_publicacion.getEditor().textProperty());
         zona.bind(cbox_zona.valueProperty());
         ubicacion.bind(tf_ubicacion.textProperty());
         habitaciones.bind(spinner_habitaciones.valueProperty().asString());
@@ -66,23 +76,42 @@ public class MoldInmuebleController {
         m2.bind(tf_m2.textProperty());
         m2utiles.bind(tf_m2utiles.textProperty());
 
+
         initZonaComboBox();
         initHabitacionesSpinner();
         initBannosSpinner();
         initPrecio();
         initMetros();
         initPublicacion();
+
+        if(inmueble != null){
+            if(inmueble.descripcion == null){
+                inmueble.descripcion = new SimpleStringProperty();
+            }
+            tf_titulo.setText(inmueble.getTitulo());
+            tf_precio.setText(String.valueOf(inmueble.precio.get()));
+            inmueble.formatDate();
+            date_publicacion.getEditor().setText(inmueble.getFechaPublicacion());
+            cbox_zona.getSelectionModel().select(inmueble.getZona());
+            tf_ubicacion.setText(inmueble.getUbicacion());
+            spinner_habitaciones.getEditor().setText(String.valueOf(inmueble.getHabitaciones()));
+            spinner_bannos.getEditor().setText(String.valueOf(inmueble.getBannos()));
+            ta_descripcion.setText(inmueble.getDescripcion());
+            tf_m2.setText(String.valueOf(inmueble.metrosConstruidos.get()));
+            tf_m2utiles.setText(String.valueOf(inmueble.metrosUtiles.get()));
+        }
     }
 
-    public void initPrecio(){
+    public void initPrecio() {
         tf_precio.textProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
-                if (!newValue.matches("\\d*")) {
+                if (!newValue.matches("\\d*\\.?\\d*")) {
                     tf_precio.setText(oldValue);
                 }
             }
         });
+
     }
 
     public void initMetros(){
@@ -114,7 +143,7 @@ public class MoldInmuebleController {
             public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
                 if (!newValue.matches(fechaPattern)) {
                     Platform.runLater(() -> {
-                        date_publicacion.getEditor().setText(oldValue);
+                        date_publicacion.getEditor().clear();
                     });
                 }
             }
@@ -221,7 +250,7 @@ public class MoldInmuebleController {
             correcto = false;
         }
 
-        if (zona.get().equals("null")) {
+        if (zona.get().equals("Todas las zonas")) {
             report.setText("Seleccione una zona");
             correcto = false;
         }
@@ -233,7 +262,7 @@ public class MoldInmuebleController {
     private void postInmuebleToDB() {
         URL url;
         HttpURLConnection connection;
-        Inmueble inmueble;
+
 
         StringBuilder sb = new StringBuilder();
 
@@ -246,22 +275,22 @@ public class MoldInmuebleController {
             sb.append("\"metrosUtiles\" : " + m2utiles.get() + ", ");
             sb.append("\"ubicacion\" : \"" + ubicacion.get() + "\", ");
             sb.append("\"zona\" : \"" + (zona.get().equals("Todas las zonas") ? "" : zona.get()) + "\", ");
-            sb.append("\"fechaPublicacion\" : \"" + publicacion.get() + "\", ");
+            sb.append("\"fechaPublicacion\" : \"" + Inmueble.dateToSQLDate(publicacion.get()) + "\", ");
             sb.append("\"habitaciones\" : " + habitaciones.get() + ", ");
             sb.append("\"bannos\" : " + bannos.get());
             sb.append("}");
-            System.out.println(sb.toString());
-
             try {
-                url = new URL("http://localhost:8080/api/inmuebles/");
+                url = new URL("http://localhost:8080/api/inmuebles/" + (inmueble == null ? "": inmueble.idInmueble.get()));
                 connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("POST");
-                connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
                 connection.setDoOutput(true);
                 connection.setDoInput(true);
+                connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
                 connection.getOutputStream().write(sb.toString().getBytes("UTF-8"));
                 connection.getOutputStream().close();
                 connection.connect();
+                System.out.println(sb.toString());
+                System.out.println(connection.getResponseCode());
                 if (connection.getResponseCode() == 200) {
                     mainController.setLastMoldInmuebleResult(titulo.get());
                     myStage.close();
