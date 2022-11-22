@@ -1,6 +1,7 @@
 package com.inmohernandez.cliente.controllers;
 
 import com.google.gson.*;
+import com.inmohernandez.cliente.dao.InmuebleDAO;
 import com.inmohernandez.cliente.models.Inmueble;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -28,12 +29,30 @@ import java.text.DecimalFormat;
 import java.util.List;
 
 public class MoldInmuebleController {
+    @FXML
+    private TextField tf_titulo, tf_precio, tf_ubicacion, tf_m2, tf_m2utiles;
+
+    @FXML
+    private TextArea ta_descripcion;
+
+    @FXML
+    private DatePicker date_publicacion;
+
+    @FXML
+    private Spinner spinner_habitaciones, spinner_bannos;
+
+    @FXML
+    private Button btn_mod;
+
+    @FXML
+    private ComboBox cbox_zona;
+
+    @FXML
+    private Label report;
     private String mode;
     private Inmueble inmueble;
     private Stage myStage;
-
     private MainInmueblesController mainController;
-
 
     private SimpleStringProperty titulo, precio, publicacion, zona,
     ubicacion, habitaciones, bannos, descripcion, m2, m2utiles;
@@ -50,9 +69,6 @@ public class MoldInmuebleController {
         }else{
             btn_mod.setText("Editar");
         }
-
-
-
 
         titulo = new SimpleStringProperty();
         precio = new SimpleStringProperty();
@@ -75,7 +91,6 @@ public class MoldInmuebleController {
         descripcion.bind(ta_descripcion.textProperty());
         m2.bind(tf_m2.textProperty());
         m2utiles.bind(tf_m2utiles.textProperty());
-
 
         initZonaComboBox();
         initHabitacionesSpinner();
@@ -165,7 +180,6 @@ public class MoldInmuebleController {
         zonas.add("Matagorda");
         zonas.add("San Agustín");
         zonas.sort(null);
-        zonas.add(0,"Todas las zonas");
         cbox_zona.getItems().addAll(zonas);
         cbox_zona.getSelectionModel().selectFirst();
     }
@@ -197,30 +211,34 @@ public class MoldInmuebleController {
             }
         });
     }
-    @FXML
-    private TextField tf_titulo, tf_precio, tf_ubicacion, tf_m2, tf_m2utiles;
 
-    @FXML
-    private TextArea ta_descripcion;
-
-    @FXML
-    private DatePicker date_publicacion;
-
-    @FXML
-    private Spinner spinner_habitaciones, spinner_bannos;
-
-    @FXML
-    private Button btn_mod;
-
-    @FXML
-    private ComboBox cbox_zona;
-
-    @FXML
-    private Label report;
 
     @FXML
     public void modInmueble(){
-        postInmuebleToDB();
+        StringBuilder sb = new StringBuilder();
+        boolean posted;
+        if (comprobarFormulario()) {
+            sb.append("{");
+            sb.append("\"titulo\" : \"" + titulo.get() + "\", ");
+            sb.append("\"precio\" : " + precio.get() + ", ");
+            sb.append("\"descripcion\" : \"" + descripcion.get() + "\", ");
+            sb.append("\"metrosConstruidos\" : " + m2.get() + ", ");
+            sb.append("\"metrosUtiles\" : " + m2utiles.get() + ", ");
+            sb.append("\"ubicacion\" : \"" + ubicacion.get() + "\", ");
+            sb.append("\"zona\" : \"" + (zona.get().equals("Todas las zonas") ? "" : zona.get()) + "\", ");
+            sb.append("\"fechaPublicacion\" : \"" + Inmueble.dateToSQLDate(publicacion.get()) + "\", ");
+            sb.append("\"habitaciones\" : " + habitaciones.get() + ", ");
+            sb.append("\"bannos\" : " + bannos.get());
+            sb.append("}");
+            System.out.println(sb.toString());
+            posted = InmuebleDAO.postInmuebleByIdInDB(inmueble == null ? null:String.valueOf(inmueble.getId()),sb.toString());
+            if(posted){
+                myStage.close();
+                mainController.setMsgFromMoldInmueble("Inmueble " + ((inmueble == null) ? "creado": "editado") + " correctamente");
+            }else{
+                report.setText("Fallo al postear inmueble.");
+            }
+        }
     }
 
     @FXML
@@ -255,54 +273,7 @@ public class MoldInmuebleController {
             correcto = false;
         }
 
-
         return correcto;
     }
 
-    private void postInmuebleToDB() {
-        URL url;
-        HttpURLConnection connection;
-
-
-        StringBuilder sb = new StringBuilder();
-
-        if (comprobarFormulario()) {
-            sb.append("{");
-            sb.append("\"titulo\" : \"" + titulo.get() + "\", ");
-            sb.append("\"precio\" : " + precio.get() + ", ");
-            sb.append("\"descripcion\" : \"" + descripcion.get() + "\", ");
-            sb.append("\"metrosConstruidos\" : " + m2.get() + ", ");
-            sb.append("\"metrosUtiles\" : " + m2utiles.get() + ", ");
-            sb.append("\"ubicacion\" : \"" + ubicacion.get() + "\", ");
-            sb.append("\"zona\" : \"" + (zona.get().equals("Todas las zonas") ? "" : zona.get()) + "\", ");
-            sb.append("\"fechaPublicacion\" : \"" + Inmueble.dateToSQLDate(publicacion.get()) + "\", ");
-            sb.append("\"habitaciones\" : " + habitaciones.get() + ", ");
-            sb.append("\"bannos\" : " + bannos.get());
-            sb.append("}");
-            try {
-                url = new URL("http://localhost:8080/api/inmuebles/" + (inmueble == null ? "": inmueble.idInmueble.get()));
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("POST");
-                connection.setDoOutput(true);
-                connection.setDoInput(true);
-                connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-                connection.getOutputStream().write(sb.toString().getBytes("UTF-8"));
-                connection.getOutputStream().close();
-                connection.connect();
-                System.out.println(sb.toString());
-                System.out.println(connection.getResponseCode());
-                if (connection.getResponseCode() == 200) {
-                    mainController.setLastMoldInmuebleResult(titulo.get());
-                    myStage.close();
-                }
-                connection.disconnect();
-
-            } catch (MalformedURLException e) {
-                throw new RuntimeException(e);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-        }
-    }
 }
