@@ -312,6 +312,37 @@ public class MainInmueblesController {
     }
 
     @FXML
+    public void verAlquileresInmueble(){
+        Stage stage;
+        FXMLLoader fxmlLoader;
+        MainAquileresController alquileresController;
+        Inmueble inmueble;
+
+        if(seleccionado.get().isBlank()){
+            showReport("Selecciona un inmueble.",2);
+        }else{
+            inmueble = InmuebleDAO.getInmuebleByIdFromDB(seleccionado.get());
+            if(inmueble == null){
+                showReport("Inmueble no encontrado.",2);
+            }else{
+                stage = new Stage();
+                fxmlLoader = new FXMLLoader(MainApp.class.getResource("main-alquileres-view.fxml"));
+                stage.setTitle("\uD83D\uDD11 "+inmueble.getTitulo());
+                try {
+                    stage.setScene(new Scene(fxmlLoader.load()));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                stage.initModality(Modality.APPLICATION_MODAL);
+                alquileresController = fxmlLoader.getController();
+                alquileresController.initController(stage,this,1);
+                stage.showAndWait();
+                updateTableViewInmuebles();
+            }
+        }
+    }
+
+    @FXML
     public void clickLimpiarFiltros(){
         tf_precio_desde.clear();
         tf_precio_hasta.clear();
