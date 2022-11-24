@@ -103,10 +103,12 @@ public class MainInmueblesController {
             @Override
             public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
                 if (!newValue.matches(fechaPattern)) {
+                    if(!newValue.isBlank()){
+                        showReport("Requerido (dd/MM/YYYY)", 2);
+                    }
                     Platform.runLater(() -> {
                         date_publicacion_hasta.getEditor().clear();
                     });
-                    showReport("Requerido (dd/MM/YYYY)",2);
                 }else{
                     desde = date_publicacion_desde.getEditor().getText();
                     if(!desde.isBlank()){
@@ -132,10 +134,12 @@ public class MainInmueblesController {
             @Override
             public void changed(ObservableValue<? extends String> observableValue, String oldValue, String newValue) {
                 if (!newValue.matches(fechaPattern)) {
+                    if(!newValue.isBlank()){
+                        showReport("Requerido (dd/MM/YYYY)", 2);
+                    }
                     Platform.runLater(() -> {
                         date_publicacion_desde.getEditor().clear();
                     });
-                    showReport("Requerido (dd/MM/YYYY)",2);
                 }else{
                     hasta = date_publicacion_hasta.getEditor().getText();
                     if(!hasta.isBlank()){
@@ -335,7 +339,7 @@ public class MainInmueblesController {
                 }
                 stage.initModality(Modality.APPLICATION_MODAL);
                 alquileresController = fxmlLoader.getController();
-                alquileresController.initController(stage,this,1);
+                alquileresController.initController(stage,this,Integer.parseInt(seleccionado.get()));
                 stage.showAndWait();
                 updateTableViewInmuebles();
             }

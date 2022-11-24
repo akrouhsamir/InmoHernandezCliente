@@ -68,7 +68,7 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             </rowConstraints>
             <children>
-                <TextField fx:id="tf_search" maxHeight="1.7976931348623157E308">
+                <TextField fx:id="tf_search" maxHeight="1.7976931348623157E308" onKeyTyped="#keyTypedSearch">
                     <GridPane.margin>
                         <Insets bottom="10.0" top="10.0" />
                     </GridPane.margin>
@@ -138,7 +138,7 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             </rowConstraints>
             <children>
-                <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Limpiar filtros" GridPane.columnIndex="1" GridPane.valignment="BOTTOM">
+                <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clickLimpiarFiltros" text="Limpiar filtros" GridPane.columnIndex="1" GridPane.valignment="BOTTOM">
                     <GridPane.margin>
                         <Insets left="20.0" right="10.0" />
                     </GridPane.margin>
@@ -146,7 +146,7 @@
                         <Font name="Tw Cen MT" size="15.0" />
                     </font>
                 </Button>
-                <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Aplicar filtros" GridPane.valignment="BOTTOM">
+                <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clickAplicarFiltros" text="Aplicar filtros" GridPane.valignment="BOTTOM">
                     <GridPane.margin>
                         <Insets left="30.0" />
                     </GridPane.margin>
@@ -156,5 +156,10 @@
                 </Button>
             </children>
         </GridPane>
+      <Label fx:id="report" GridPane.columnSpan="2" GridPane.rowIndex="8" GridPane.valignment="TOP">
+         <GridPane.margin>
+            <Insets left="30.0" top="30.0" />
+         </GridPane.margin>
+      </Label>
     </children>
 </GridPane>
