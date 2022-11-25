@@ -68,7 +68,7 @@
                 <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             </rowConstraints>
             <children>
-                <TextField fx:id="tf_search" maxHeight="1.7976931348623157E308" onKeyTyped="#keyTypedSearch">
+                <TextField fx:id="tf_search" maxHeight="1.7976931348623157E308" onKeyTyped="#keyTypedSearch" promptText="Buscar por cliente o id">
                     <GridPane.margin>
                         <Insets bottom="10.0" top="10.0" />
                     </GridPane.margin>
@@ -78,7 +78,7 @@
                         <Insets bottom="10.0" top="10.0" />
                     </GridPane.margin>
                 </Button>
-                <Button mnemonicParsing="false" style="-fx-background-color: #6fb058;" text="➕" GridPane.columnIndex="2" GridPane.halignment="RIGHT">
+                <Button id="btnCrear" mnemonicParsing="false" onAction="#crearAlquiler" style="-fx-background-color: #6fb058;" text="➕" GridPane.columnIndex="2" GridPane.halignment="RIGHT">
                     <GridPane.margin>
                         <Insets />
                     </GridPane.margin>
@@ -111,7 +111,7 @@
                     </padding>
                 </Label>
                 <TextField fx:id="tf_seleccionado" GridPane.columnIndex="1" />
-                <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" style="-fx-background-color: orange;" text="✎Editar" GridPane.columnIndex="2">
+                <Button id="btnEditar" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#editarAlquiler" style="-fx-background-color: orange;" text="✎Editar" GridPane.columnIndex="2">
                     <font>
                         <Font name="Tw Cen MT" size="16.0" />
                     </font>
@@ -119,7 +119,7 @@
                         <Insets left="20.0" />
                     </GridPane.margin>
                 </Button>
-                <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" style="-fx-background-color: #e66363;" text="🗑Borrar" GridPane.columnIndex="3">
+                <Button id="btnBorrar" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#borrarInmueble" style="-fx-background-color: #e66363;" text="🗑Borrar" GridPane.columnIndex="3">
                     <font>
                         <Font name="Tw Cen MT" size="16.0" />
                     </font>

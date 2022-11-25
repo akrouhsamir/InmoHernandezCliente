@@ -3,6 +3,7 @@ package com.inmohernandez.cliente.controllers;
 import com.inmohernandez.cliente.MainApp;
 import com.inmohernandez.cliente.dao.InmuebleDAO;
 import com.inmohernandez.cliente.models.Inmueble;
+import com.inmohernandez.cliente.utils.Utils;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -15,6 +16,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -60,8 +62,8 @@ public class MainInmueblesController {
         zona.bind(cb_zona.valueProperty());
         precioDesde.bind(tf_precio_desde.textProperty());
         precioHasta.bind(tf_precio_hasta.textProperty());
-        publicacionDesde.bind(date_publicacion_desde.valueProperty().asString());
-        publicacionHasta.bind(date_publicacion_hasta.valueProperty().asString());
+        publicacionDesde.bind(date_publicacion_desde.getEditor().textProperty());
+        publicacionHasta.bind(date_publicacion_hasta.getEditor().textProperty());
         seleccionado.bind(tf_seleccionado.textProperty());
 
         initZonaComboBox();
@@ -95,7 +97,7 @@ public class MainInmueblesController {
     }
 
     public void initFiltroPublicacion(){
-        final String fechaPattern = "([1-9]|[0-2][0-9]|3[0-1])/(0[1-9]|1[0-2])/(\\d{4})";
+        final String fechaPattern = "([1-9]|[0-2][0-9]|3[0-1])/(0[1-9]|1[0-2]|[1-9])/(\\d{4})";
 
         date_publicacion_hasta.getEditor().textProperty().addListener(new ChangeListener<String>() {
             Date bef,aft;
@@ -236,8 +238,8 @@ public class MainInmueblesController {
         sb.append("\"zona\" : \""+(zona.get().equals("Todas las zonas") ? "": zona.get())+"\", ");
         sb.append("\"precio_desde\" : "+(precioDesde.get().equals("") ? 0: precioDesde.get())+", ");
         sb.append("\"precio_hasta\" : "+(precioHasta.get().equals("") ? Float.MAX_VALUE: precioHasta.get())+", ");
-        sb.append("\"publicacion_desde\" : \""+(publicacionDesde.get().equals("null") ? "1970-01-01": publicacionDesde.get())+"\", ");
-        sb.append("\"publicacion_hasta\" : \""+(publicacionHasta.get().equals("null") ? "2299-01-01": publicacionHasta.get())+"\"");
+        sb.append("\"publicacion_desde\" : \""+(publicacionDesde.get().isBlank() ? "1970-01-01": Utils.strToSQLDate(publicacionDesde.get()))+"\", ");
+        sb.append("\"publicacion_hasta\" : \""+(publicacionHasta.get().isBlank() ? "2299-01-01": Utils.strToSQLDate(publicacionHasta.get()))+"\"");
         sb.append("}");
         return InmuebleDAO.getInmueblesFromDB(sb.toString());
     }
@@ -255,6 +257,7 @@ public class MainInmueblesController {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+        stage.getIcons().add(new Image(MainApp.class.getResource("imgs/rhinoapp.png").toExternalForm()));
         stage.initModality(Modality.APPLICATION_MODAL);
         moldController = fxmlLoader.getController();
         moldController.initController("Crear",null,stage,this);
@@ -280,6 +283,7 @@ public class MainInmueblesController {
                 stage = new Stage();
                 fxmlLoader = new FXMLLoader(MainApp.class.getResource("mold-inmueble-view.fxml"));
                 stage.setTitle("Editar inmueble");
+                stage.getIcons().add(new Image(MainApp.class.getResource("imgs/rhinoapp.png").toExternalForm()));
                 stage.setResizable(false);
                 try {
                     stage.setScene(new Scene(fxmlLoader.load()));
@@ -298,7 +302,6 @@ public class MainInmueblesController {
 
     @FXML
     public void borrarInmueble(){
-        HttpURLConnection connection;
         boolean removed = false;
 
         if(seleccionado.get().isBlank()){
@@ -331,12 +334,13 @@ public class MainInmueblesController {
             }else{
                 stage = new Stage();
                 fxmlLoader = new FXMLLoader(MainApp.class.getResource("main-alquileres-view.fxml"));
-                stage.setTitle("\uD83D\uDD11 "+inmueble.getTitulo());
+                stage.setTitle("Alquileres: "+inmueble.getTitulo());
                 try {
                     stage.setScene(new Scene(fxmlLoader.load()));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
+                stage.getIcons().add(new Image(MainApp.class.getResource("imgs/rhinoapp.png").toExternalForm()));
                 stage.initModality(Modality.APPLICATION_MODAL);
                 alquileresController = fxmlLoader.getController();
                 alquileresController.initController(stage,this,Integer.parseInt(seleccionado.get()));

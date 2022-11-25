@@ -18,4 +18,7 @@ module com.inmohernandez.cliente {
 
     opens com.inmohernandez.cliente.dao to com.google.gson;
     exports com.inmohernandez.cliente.dao;
+
+    opens com.inmohernandez.cliente.utils to javafx.fxml;
+    exports com.inmohernandez.cliente.utils;
 }

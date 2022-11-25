@@ -3,6 +3,7 @@ package com.inmohernandez.cliente.dao;
 import com.google.gson.*;
 
 import com.inmohernandez.cliente.models.Inmueble;
+import com.inmohernandez.cliente.utils.Utils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import java.io.IOException;
@@ -38,7 +39,7 @@ public class InmuebleDAO {
             isr.close();
             for (JsonElement element : jsonInmuebles) {
                 inmueble = new Gson().fromJson(element, Inmueble.class);
-                inmueble.formatDate();
+                inmueble.setFechaPublicacion(Utils.sqlDateToEUDate(inmueble.getFechaPublicacion()));
                 inmuebles.add(inmueble);
             }
 
@@ -74,7 +75,7 @@ public class InmuebleDAO {
         HttpURLConnection connection;
         boolean result = false;
         try {
-            url = new URL("http://localhost:8080/api/inmuebles/" + (id == null ? "": id));
+            url = new URL(ROOTAPI + (id == null ? "": id));
             connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);

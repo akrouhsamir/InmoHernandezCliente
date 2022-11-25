@@ -40,25 +40,6 @@ public class Inmueble {
     @JsonAdapter(StringPropertyAdapter.class)
     public StringProperty fechaPublicacion;
 
-
-
-    @Override
-    public String toString() {
-        return "Inmueble{" +
-                "id=" + idInmueble +
-                ", titulo=" + titulo +
-                ", precio=" + precio +
-                ", descripcion=" + descripcion +
-                ", metrosConstruidos=" + metrosConstruidos +
-                ", metrosUtiles=" + metrosUtiles +
-                ", ubicacion=" + ubicacion +
-                ", zona=" + zona +
-                ", fechaPublicacion=" + fechaPublicacion +
-                ", habitaciones=" + habitaciones +
-                ", bannos=" + bannos +
-                '}';
-    }
-
     @Expose
     @JsonAdapter(IntegerPropertyAdapter.class)
     public IntegerProperty habitaciones;
@@ -86,16 +67,6 @@ public class Inmueble {
 
     }
 
-
-    public void formatDate(){
-        String [] dts = getFechaPublicacion().split("-");
-        this.fechaPublicacion.set(dts[2]+"/"+dts[1]+"/"+dts[0]);
-    }
-
-    public static String dateToSQLDate(String date){
-        String [] dts = date.split("/");
-        return dts[2]+"-"+dts[1]+"-"+  (dts[0].length() == 1? "0" + dts[0]: dts[0]);
-    }
 
     public Inmueble(String titulo){
         this.titulo = new SimpleStringProperty(titulo);
@@ -237,5 +208,21 @@ public class Inmueble {
         this.bannos.set(bannos);
     }
 
+    @Override
+    public String toString() {
+        return "Inmueble{" +
+                "id=" + idInmueble +
+                ", titulo=" + titulo +
+                ", precio=" + precio +
+                ", descripcion=" + descripcion +
+                ", metrosConstruidos=" + metrosConstruidos +
+                ", metrosUtiles=" + metrosUtiles +
+                ", ubicacion=" + ubicacion +
+                ", zona=" + zona +
+                ", fechaPublicacion=" + fechaPublicacion +
+                ", habitaciones=" + habitaciones +
+                ", bannos=" + bannos +
+                '}';
+    }
 
 }

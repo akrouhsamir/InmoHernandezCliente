@@ -3,6 +3,7 @@ package com.inmohernandez.cliente.controllers;
 import com.google.gson.*;
 import com.inmohernandez.cliente.dao.InmuebleDAO;
 import com.inmohernandez.cliente.models.Inmueble;
+import com.inmohernandez.cliente.utils.Utils;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -49,7 +50,7 @@ public class MoldInmuebleController {
 
     @FXML
     private Label report;
-    private String mode;
+
     private Inmueble inmueble;
     private Stage myStage;
     private MainInmueblesController mainController;
@@ -60,7 +61,6 @@ public class MoldInmuebleController {
 
     public void initController(String mode, Inmueble inmueble, Stage myStage, MainInmueblesController mainController){
         this.inmueble = inmueble;
-        this.mode = mode;
         this.myStage = myStage;
         this.mainController = mainController;
 
@@ -105,8 +105,7 @@ public class MoldInmuebleController {
             }
             tf_titulo.setText(inmueble.getTitulo());
             tf_precio.setText(String.valueOf(inmueble.precio.get()));
-            inmueble.formatDate();
-            date_publicacion.getEditor().setText(inmueble.getFechaPublicacion());
+            date_publicacion.getEditor().setText(Utils.sqlDateToEUDate(inmueble.getFechaPublicacion()));
             cbox_zona.getSelectionModel().select(inmueble.getZona());
             tf_ubicacion.setText(inmueble.getUbicacion());
             spinner_habitaciones.getEditor().setText(String.valueOf(inmueble.getHabitaciones()));
@@ -151,7 +150,7 @@ public class MoldInmuebleController {
 
 
     public void initPublicacion(){
-        final String fechaPattern = "([1-9]|[0-2][0-9]|3[0-1])/(0[1-9]|1[0-2])/(\\d{4})";
+        final String fechaPattern = "([1-9]|[0-2][0-9]|3[0-1])/(0[1-9]|1[0-2]|[1-9])/(\\d{4})";
 
         date_publicacion.getEditor().textProperty().addListener(new ChangeListener<String>() {
             @Override
@@ -226,11 +225,10 @@ public class MoldInmuebleController {
             sb.append("\"metrosUtiles\" : " + m2utiles.get() + ", ");
             sb.append("\"ubicacion\" : \"" + ubicacion.get() + "\", ");
             sb.append("\"zona\" : \"" + (zona.get().equals("Todas las zonas") ? "" : zona.get()) + "\", ");
-            sb.append("\"fechaPublicacion\" : \"" + Inmueble.dateToSQLDate(publicacion.get()) + "\", ");
+            sb.append("\"fechaPublicacion\" : \"" + Utils.strToSQLDate(publicacion.get()) + "\", ");
             sb.append("\"habitaciones\" : " + habitaciones.get() + ", ");
             sb.append("\"bannos\" : " + bannos.get());
             sb.append("}");
-            System.out.println(sb.toString());
             posted = InmuebleDAO.postInmuebleByIdInDB(inmueble == null ? null:String.valueOf(inmueble.getId()),sb.toString());
             if(posted){
                 myStage.close();

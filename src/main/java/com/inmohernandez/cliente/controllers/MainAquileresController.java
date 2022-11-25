@@ -1,7 +1,9 @@
 package com.inmohernandez.cliente.controllers;
 
+import com.inmohernandez.cliente.MainApp;
 import com.inmohernandez.cliente.dao.AlquilerDAO;
 import com.inmohernandez.cliente.models.Alquiler;
+import com.inmohernandez.cliente.utils.Utils;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
@@ -10,8 +12,12 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -37,11 +43,18 @@ public class MainAquileresController {
 
     private int idInmueble;
 
+    private String msgFromMoldAlquiler;
+
     @FXML
     private Label report;
-    private SimpleStringProperty search,fechaDesde, fechaHasta;
+    private SimpleStringProperty search,fechaDesde, fechaHasta, seleccionado;
 
     private List<Alquiler> lastAlquileresRefresh = FXCollections.observableArrayList();
+
+    public void setMsgFromMoldAlquiler(String msgFromMoldAlquiler) {
+        this.msgFromMoldAlquiler = msgFromMoldAlquiler;
+    }
+
 
     public void initController(Stage myStage, MainInmueblesController mainController, int idInmueble){
         this.myStage = myStage;
@@ -51,10 +64,12 @@ public class MainAquileresController {
         search = new SimpleStringProperty();
         fechaDesde = new SimpleStringProperty();
         fechaHasta = new SimpleStringProperty();
+        seleccionado = new SimpleStringProperty();
 
         search.bind(tf_search.textProperty());
-        fechaDesde.bind(date_desde.valueProperty().asString());
-        fechaHasta.bind(date_hasta.valueProperty().asString());
+        fechaDesde.bind(date_desde.getEditor().textProperty());
+        fechaHasta.bind(date_hasta.getEditor().textProperty());
+        seleccionado.bind(tf_seleccionado.textProperty());
 
         initAlquileresTableView();
         updateTableViewAlquileres();
@@ -82,12 +97,10 @@ public class MainAquileresController {
 
     private void updateTableViewAlquileres(){
         ObservableList<Alquiler> alquileres;
-
         tv_alquileres.getItems().clear();
 
         try {
             alquileres = getAlquileresFromDAO();
-            System.out.println(alquileres);
             tv_alquileres.getItems().addAll(alquileres);
             lastAlquileresRefresh = alquileres;
         } catch (IOException e) {
@@ -99,8 +112,8 @@ public class MainAquileresController {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("\"idInmueble\" : " + idInmueble + ", ");
-        sb.append("\"fecha_desde\" : \"" + (fechaDesde.get().equals("null") ? "1970-01-01": fechaDesde.get())+ "\", ");
-        sb.append("\"fecha_hasta\" : \"" + (fechaHasta.get().equals("null") ? "2299-01-01": fechaHasta.get())+ "\"");
+        sb.append("\"fecha_desde\" : \"" + (fechaDesde.get().isBlank() ? "1970-01-01": Utils.strToSQLDate(fechaDesde.get())) + "\", ");
+        sb.append("\"fecha_hasta\" : \"" + (fechaHasta.get().isBlank() ? "2299-01-01": Utils.strToSQLDate(fechaHasta.get()))+ "\"");
         sb.append("}");
         return AlquilerDAO.getAlquileresFromDB(sb.toString());
     }
@@ -141,7 +154,7 @@ public class MainAquileresController {
     }
 
     public void initFiltroFecha() {
-        final String fechaPattern = "([1-9]|[0-2][0-9]|3[0-1])/(0[1-9]|1[0-2])/(\\d{4})";
+        final String fechaPattern = "([1-9]|[0-2][0-9]|3[0-1])/(0[1-9]|1[0-2]|[1-9])/(\\d{4})";
 
         date_desde.getEditor().textProperty().addListener(new ChangeListener<String>() {
             Date bef, aft;
@@ -218,5 +231,78 @@ public class MainAquileresController {
     @FXML
     public void clickAplicarFiltros(){
         updateTableViewAlquileres();
+    }
+
+    @FXML
+    public void crearAlquiler(){
+        Stage stage = new Stage();
+        FXMLLoader fxmlLoader = new FXMLLoader(MainApp.class.getResource("mold-alquiler-view.fxml"));
+        MoldAlquilerController moldController;
+        stage.setTitle("Crear inmueble");
+        stage.getIcons().add(new Image(MainApp.class.getResource("imgs/rhinoapp.png").toExternalForm()));
+        stage.setResizable(false);
+        try {
+            stage.setScene(new Scene(fxmlLoader.load()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        stage.initModality(Modality.APPLICATION_MODAL);
+        moldController = fxmlLoader.getController();
+        moldController.initController("Crear",null,stage,this,String.valueOf(idInmueble));
+        stage.showAndWait();
+        showReport(msgFromMoldAlquiler,2);
+        updateTableViewAlquileres();
+    }
+
+    @FXML
+    public void editarAlquiler(){
+        Stage stage;
+        FXMLLoader fxmlLoader;
+        MoldAlquilerController moldController;
+        Alquiler alquiler;
+
+        if(seleccionado.get().isBlank()){
+            showReport("Selecciona un alquiler.",2);
+        }else{
+            alquiler = AlquilerDAO.getAlquilerByIdFromDB(seleccionado.get());
+            if(alquiler == null){
+                showReport("Alquiler no encontrado.",2);
+            }else{
+                stage = new Stage();
+                stage.getIcons().add(new Image(MainApp.class.getResource("imgs/rhinoapp.png").toExternalForm()));
+                fxmlLoader = new FXMLLoader(MainApp.class.getResource("mold-alquiler-view.fxml"));
+                stage.setTitle("Editar alquiler");
+                stage.setResizable(false);
+                try {
+                    stage.setScene(new Scene(fxmlLoader.load()));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                stage.initModality(Modality.APPLICATION_MODAL);
+                moldController = fxmlLoader.getController();
+                moldController.initController("Editar",alquiler,stage,this,String.valueOf(idInmueble));
+                stage.showAndWait();
+                showReport(msgFromMoldAlquiler,2);
+                updateTableViewAlquileres();
+            }
+        }
+    }
+
+    @FXML
+    public void borrarInmueble(){
+        boolean removed = false;
+
+        if(seleccionado.get().isBlank()){
+            showReport("Selecciona un alquiler.",2);
+        }else{
+            removed = AlquilerDAO.removeAlquilerByIdInDB(seleccionado.get());
+            if(removed){
+                showReport("Alquiler eliminado correctamente.",2);
+                updateTableViewAlquileres();
+                tf_seleccionado.clear();
+            }else{
+                showReport("Fallo al eliminar alquiler.",2);
+            }
+        }
     }
 }
