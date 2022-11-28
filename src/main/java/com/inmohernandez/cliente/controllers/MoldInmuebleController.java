@@ -1,35 +1,24 @@
 package com.inmohernandez.cliente.controllers;
 
-import com.google.gson.*;
+
 import com.inmohernandez.cliente.dao.InmuebleDAO;
 import com.inmohernandez.cliente.models.Inmueble;
 import com.inmohernandez.cliente.utils.Utils;
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.event.EventType;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
-import javafx.util.StringConverter;
-import javafx.util.converter.FormatStringConverter;
-import javafx.util.converter.NumberStringConverter;
-
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.text.DecimalFormat;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class MoldInmuebleController {
+    private Executor exec;
     @FXML
     private TextField tf_titulo, tf_precio, tf_ubicacion, tf_m2, tf_m2utiles;
 
@@ -60,6 +49,11 @@ public class MoldInmuebleController {
 
 
     public void initController(String mode, Inmueble inmueble, Stage myStage, MainInmueblesController mainController){
+        exec = Executors.newCachedThreadPool((runnable) -> {
+            Thread t = new Thread (runnable);
+            t.setDaemon(true);
+            return t;
+        });
         this.inmueble = inmueble;
         this.myStage = myStage;
         this.mainController = mainController;
@@ -215,7 +209,6 @@ public class MoldInmuebleController {
     @FXML
     public void modInmueble(){
         StringBuilder sb = new StringBuilder();
-        boolean posted;
         if (comprobarFormulario()) {
             sb.append("{");
             sb.append("\"titulo\" : \"" + titulo.get() + "\", ");
@@ -229,13 +222,21 @@ public class MoldInmuebleController {
             sb.append("\"habitaciones\" : " + habitaciones.get() + ", ");
             sb.append("\"bannos\" : " + bannos.get());
             sb.append("}");
-            posted = InmuebleDAO.postInmuebleByIdInDB(inmueble == null ? null:String.valueOf(inmueble.getId()),sb.toString());
-            if(posted){
-                myStage.close();
-                mainController.setMsgFromMoldInmueble("Inmueble " + ((inmueble == null) ? "creado": "editado") + " correctamente");
-            }else{
-                report.setText("Fallo al postear inmueble.");
-            }
+            Task<Boolean> task = new Task<Boolean>() {
+                @Override
+                protected Boolean call() throws Exception {
+                    return InmuebleDAO.postInmuebleByIdInDB(inmueble == null ? null:String.valueOf(inmueble.getId()),sb.toString());
+                }
+            };
+            task.setOnSucceeded(e->{
+                if(task.getValue()){
+                    myStage.close();
+                    mainController.setMsgFromMoldInmueble("Inmueble " + ((inmueble == null) ? "creado": "editado") + " correctamente");
+                }else{
+                    report.setText("Fallo al postear inmueble.");
+                }
+            });
+            exec.execute(task);
         }
     }
 

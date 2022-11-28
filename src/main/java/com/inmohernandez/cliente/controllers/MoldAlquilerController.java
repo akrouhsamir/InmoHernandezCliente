@@ -8,6 +8,7 @@ import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
@@ -19,6 +20,8 @@ import javafx.util.Duration;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class MoldAlquilerController {
     @FXML
@@ -43,11 +46,19 @@ public class MoldAlquilerController {
 
     private String idInmueble;
 
+    private Executor exec;
+
     public void initController(String mode, Alquiler alquiler, Stage myStage, MainAquileresController mainController,String idInmueble){
         this.alquiler = alquiler;
         this.myStage = myStage;
         this.mainController = mainController;
         this.idInmueble = idInmueble;
+
+        exec = Executors.newCachedThreadPool((runnable) -> {
+            Thread t = new Thread (runnable);
+            t.setDaemon(true);
+            return t;
+        });
 
         if(mode.equals("Crear")){
             btn_mod.setText("Crear");
@@ -198,7 +209,6 @@ public class MoldAlquilerController {
     @FXML
     public void modAlquiler(){
         StringBuilder sb = new StringBuilder();
-        boolean posted;
         if (comprobarFormulario()) {
             sb.append("{");
             sb.append("\"cliente\" : \"" + cliente.get() + "\", ");
@@ -207,13 +217,23 @@ public class MoldAlquilerController {
             sb.append("\"mensualidad\" : " + mensualidad.get() + ", ");
             sb.append("\"idInmueble\" : " + idInmueble);
             sb.append("}");
-            posted = AlquilerDAO.postAlquilerByIdInDB(alquiler == null ? null:String.valueOf(alquiler.getId()),sb.toString());
-            if(posted){
-                myStage.close();
-                mainController.setMsgFromMoldAlquiler("Alquiler " + ((alquiler == null) ? "creado": "editado") + " correctamente");
-            }else{
-                showReport("Fallo al postear inmueble.",3);
-            }
+
+            Task<Boolean> task = new Task<Boolean>() {
+                @Override
+                protected Boolean call() throws Exception {
+                    return AlquilerDAO.postAlquilerByIdInDB(alquiler == null ? null:String.valueOf(alquiler.getId()),sb.toString());
+                }
+            };
+
+            task.setOnSucceeded(ee->{
+                if(task.getValue()){
+                    myStage.close();
+                    mainController.setMsgFromMoldAlquiler("Alquiler " + ((alquiler == null) ? "creado": "editado") + " correctamente");
+                }else{
+                    showReport("Fallo al postear inmueble.",3);
+                }
+            });
+            exec.execute(task);
         }
     }
 }

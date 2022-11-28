@@ -3,6 +3,7 @@ package com.inmohernandez.cliente.controllers;
 import com.inmohernandez.cliente.MainApp;
 import com.inmohernandez.cliente.dao.AlquilerDAO;
 import com.inmohernandez.cliente.models.Alquiler;
+import com.inmohernandez.cliente.models.Inmueble;
 import com.inmohernandez.cliente.utils.Utils;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
@@ -11,6 +12,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -22,10 +24,13 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class MainAquileresController {
     @FXML
@@ -47,6 +52,8 @@ public class MainAquileresController {
 
     @FXML
     private Label report;
+
+    private Executor exec;
     private SimpleStringProperty search,fechaDesde, fechaHasta, seleccionado;
 
     private List<Alquiler> lastAlquileresRefresh = FXCollections.observableArrayList();
@@ -57,6 +64,11 @@ public class MainAquileresController {
 
 
     public void initController(Stage myStage, MainInmueblesController mainController, int idInmueble){
+        exec = Executors.newCachedThreadPool((runnable) -> {
+            Thread t = new Thread (runnable);
+            t.setDaemon(true);
+            return t;
+        });
         this.myStage = myStage;
         this.mainController = mainController;
         this.idInmueble = idInmueble;
@@ -86,36 +98,58 @@ public class MainAquileresController {
         colFechaFin = new TableColumn("Fecha fin");
         colMensualidad = new TableColumn("Mensualidad");
 
+        colId.setMaxWidth(60);
+        colCliente.setMinWidth(140);
+        colFechaInicio.setMinWidth(130);
+        colFechaFin.setMinWidth(130);
+        colMensualidad.setMinWidth(140);
+
         colId.setCellValueFactory(new PropertyValueFactory<Alquiler,Long>("id"));
         colCliente.setCellValueFactory(new PropertyValueFactory<Alquiler,String>("cliente"));
         colFechaInicio.setCellValueFactory(new PropertyValueFactory<Alquiler,String>("fechaInicio"));
         colFechaFin.setCellValueFactory(new PropertyValueFactory<Alquiler,String>("fechaFin"));
         colMensualidad.setCellValueFactory(new PropertyValueFactory<Alquiler,Float>("mensualidad"));
-
+        colMensualidad.setCellFactory(tc -> new TableCell<Inmueble, Float>() {
+            @Override
+            protected void updateItem(Float mensualidad, boolean empty) {
+                super.updateItem(mensualidad, empty);
+                if (empty) {
+                    setText(null);
+                } else {
+                    DecimalFormat formatter = new DecimalFormat("#,###.00");
+                    setText(formatter.format(mensualidad)+" €");
+                }
+            }
+        });
         tv_alquileres.getColumns().addAll(colId,colCliente,colFechaInicio,colFechaFin,colMensualidad);
     }
 
     private void updateTableViewAlquileres(){
-        ObservableList<Alquiler> alquileres;
         tv_alquileres.getItems().clear();
-
-        try {
-            alquileres = getAlquileresFromDAO();
-            tv_alquileres.getItems().addAll(alquileres);
-            lastAlquileresRefresh = alquileres;
-        } catch (IOException e) {
-            showReport("Error al conectar con el servidor",5);
-        }
-    }
-
-    private ObservableList<Alquiler> getAlquileresFromDAO() throws IOException {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
         sb.append("\"idInmueble\" : " + idInmueble + ", ");
         sb.append("\"fecha_desde\" : \"" + (fechaDesde.get().isBlank() ? "1970-01-01": Utils.strToSQLDate(fechaDesde.get())) + "\", ");
         sb.append("\"fecha_hasta\" : \"" + (fechaHasta.get().isBlank() ? "2299-01-01": Utils.strToSQLDate(fechaHasta.get()))+ "\"");
         sb.append("}");
-        return AlquilerDAO.getAlquileresFromDB(sb.toString());
+
+        Task<ObservableList<Alquiler>> task = new Task<ObservableList<Alquiler>>() {
+            @Override
+            protected ObservableList<Alquiler> call() throws Exception {
+                return AlquilerDAO.getAlquileresFromDB(sb.toString());
+            }
+        };
+
+        task.setOnSucceeded(e->{
+            tv_alquileres.getItems().addAll(task.getValue());
+            lastAlquileresRefresh = task.getValue();
+        });
+
+        task.setOnFailed(e->{
+            showReport("Error al conectar con el servidor",5);
+        });
+
+        exec.execute(task);
     }
 
     public void showReport(String msg,int dur){
@@ -256,15 +290,19 @@ public class MainAquileresController {
 
     @FXML
     public void editarAlquiler(){
-        Stage stage;
-        FXMLLoader fxmlLoader;
-        MoldAlquilerController moldController;
-        Alquiler alquiler;
+        Task<Alquiler> task = new Task<Alquiler>() {
+            @Override
+            protected Alquiler call() throws Exception {
+                return AlquilerDAO.getAlquilerByIdFromDB(seleccionado.get());
+            }
+        };
 
-        if(seleccionado.get().isBlank()){
-            showReport("Selecciona un alquiler.",2);
-        }else{
-            alquiler = AlquilerDAO.getAlquilerByIdFromDB(seleccionado.get());
+        task.setOnSucceeded(ee->{
+            Stage stage;
+            FXMLLoader fxmlLoader;
+            MoldAlquilerController moldController;
+            Alquiler alquiler;
+            alquiler = task.getValue();
             if(alquiler == null){
                 showReport("Alquiler no encontrado.",2);
             }else{
@@ -285,23 +323,45 @@ public class MainAquileresController {
                 showReport(msgFromMoldAlquiler,2);
                 updateTableViewAlquileres();
             }
+        });
+
+
+        if(seleccionado.get().isBlank()){
+            showReport("Selecciona un alquiler.",2);
+        }else{
+            exec.execute(task);
         }
     }
 
     @FXML
     public void borrarInmueble(){
-        boolean removed = false;
+        Task<Boolean> task = new Task<Boolean>() {
+            @Override
+            protected Boolean call() throws Exception {
+                return AlquilerDAO.removeAlquilerByIdInDB(seleccionado.get());
+            }
+        };
 
-        if(seleccionado.get().isBlank()){
-            showReport("Selecciona un alquiler.",2);
-        }else{
-            removed = AlquilerDAO.removeAlquilerByIdInDB(seleccionado.get());
-            if(removed){
+        task.setOnSucceeded(e->{
+            if(task.getValue()){
                 showReport("Alquiler eliminado correctamente.",2);
                 updateTableViewAlquileres();
                 tf_seleccionado.clear();
             }else{
                 showReport("Fallo al eliminar alquiler.",2);
+            }
+        });
+
+        if(seleccionado.get().isBlank()){
+            showReport("Selecciona un alquiler.",2);
+        }else{
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "¿Estás" +
+                    " seguro del borrado del alquiler con id "+seleccionado.get()+ "?",
+                    ButtonType.YES,ButtonType.NO);
+            alert.setHeaderText(null);
+            alert.showAndWait();
+            if(alert.getResult() == ButtonType.YES){
+                exec.execute(task);
             }
         }
     }

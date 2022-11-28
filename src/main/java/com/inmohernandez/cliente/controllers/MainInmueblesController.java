@@ -11,6 +11,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -21,11 +22,13 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import java.io.IOException;
-import java.net.HttpURLConnection;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 
 public class MainInmueblesController {
@@ -47,9 +50,16 @@ public class MainInmueblesController {
         this.msgFromMoldInmueble = msgFromMoldInmueble;
     }
 
+    private Executor exec;
+
 
     @FXML
     private void initialize() {
+        exec = Executors.newCachedThreadPool((runnable) -> {
+            Thread t = new Thread (runnable);
+            t.setDaemon(true);
+            return t;
+        });
         search = new SimpleStringProperty();
         zona = new SimpleStringProperty();
         precioDesde = new SimpleStringProperty();
@@ -72,6 +82,8 @@ public class MainInmueblesController {
         initTableViewInmuebles();
         updateTableViewInmuebles();
         eventoDobleClickTV();
+
+
     }
 
     public void initFiltroPrecio(){
@@ -200,9 +212,32 @@ public class MainInmueblesController {
         colFechaPublicacion = new TableColumn("Publicacion");
         colDescripcion = new TableColumn<>("Descripcion");
 
+        colId.setMaxWidth(60);
+        colTitulo.setMinWidth(160);
+        colPrecio.setMinWidth(110);
+        colFechaPublicacion.setMinWidth(100);
+        colFechaPublicacion.setMaxWidth(100);
+        colZona.setMinWidth(130);
+        colZona.setMaxWidth(130);
+        colUbicacion.setMinWidth(200);
+        colDescripcion.setMinWidth(400);
+
+
         colId.setCellValueFactory(new PropertyValueFactory<Inmueble, Long>("id"));
         colTitulo.setCellValueFactory(new PropertyValueFactory<Inmueble, String>("titulo"));
         colPrecio.setCellValueFactory(new PropertyValueFactory<Inmueble, Float>("precio"));
+        colPrecio.setCellFactory(tc -> new TableCell<Inmueble, Float>() {
+            @Override
+            protected void updateItem(Float precio, boolean empty) {
+                super.updateItem(precio, empty);
+                if (empty) {
+                    setText(null);
+                } else {
+                    DecimalFormat formatter = new DecimalFormat("#,###.00");
+                    setText(formatter.format(precio)+" €");
+                }
+            }
+        });
         colMetrosConstruidos.setCellValueFactory(new PropertyValueFactory<Inmueble, Integer>("metrosConstruidos"));
         colMetrosUtiles.setCellValueFactory(new PropertyValueFactory<Inmueble, Integer>("metrosUtiles"));
         colZona.setCellValueFactory(new PropertyValueFactory<Inmueble, String>("zona"));
@@ -212,27 +247,15 @@ public class MainInmueblesController {
         colFechaPublicacion.setCellValueFactory(new PropertyValueFactory<Inmueble, String>("fechaPublicacion"));
         colDescripcion.setCellValueFactory(new PropertyValueFactory<Inmueble, String>("descripcion"));
 
-        tv_inmuebles.getColumns().addAll(colId, colTitulo, colPrecio,
+        tv_inmuebles.getColumns().addAll(colId, colTitulo, colPrecio,colFechaPublicacion,
                 colMetrosConstruidos, colMetrosUtiles, colZona,
-                colUbicacion, colHabitaciones, colBannos,colFechaPublicacion, colDescripcion);
+                colUbicacion, colHabitaciones, colBannos, colDescripcion);
 
     }
 
     private void updateTableViewInmuebles(){
-        ObservableList<Inmueble> inmuebles;
-
-        tv_inmuebles.getItems().clear();
-        try {
-            inmuebles = getInmueblesFromDAO();
-            tv_inmuebles.getItems().addAll(inmuebles);
-            lastInmueblesRefresh = inmuebles;
-        } catch (IOException e) {
-            showReport("Error al conectar con el servidor",5);
-        }
-    }
-
-    private ObservableList<Inmueble> getInmueblesFromDAO() throws IOException {
         StringBuilder sb = new StringBuilder();
+
         sb.append("{");
         sb.append("\"busqueda\" : \""+search.get()+"\", ");
         sb.append("\"zona\" : \""+(zona.get().equals("Todas las zonas") ? "": zona.get())+"\", ");
@@ -241,8 +264,28 @@ public class MainInmueblesController {
         sb.append("\"publicacion_desde\" : \""+(publicacionDesde.get().isBlank() ? "1970-01-01": Utils.strToSQLDate(publicacionDesde.get()))+"\", ");
         sb.append("\"publicacion_hasta\" : \""+(publicacionHasta.get().isBlank() ? "2299-01-01": Utils.strToSQLDate(publicacionHasta.get()))+"\"");
         sb.append("}");
-        return InmuebleDAO.getInmueblesFromDB(sb.toString());
+
+        Task<ObservableList<Inmueble>> task = new Task<ObservableList<Inmueble>>() {
+            @Override
+            protected ObservableList<Inmueble> call() throws Exception {
+                return InmuebleDAO.getInmueblesFromDB(sb.toString());
+            }
+        };
+
+        task.setOnSucceeded(e->{
+            tv_inmuebles.getItems().addAll((ObservableList<Inmueble>) task.getValue());
+            lastInmueblesRefresh = (ObservableList<Inmueble>) task.getValue();
+        });
+
+        task.setOnFailed(e->{
+            showReport("Error al conectar con el servidor",5);
+        });
+
+        tv_inmuebles.getItems().clear();
+        exec.execute(task);
     }
+
+
 
 
     @FXML
@@ -268,15 +311,18 @@ public class MainInmueblesController {
 
     @FXML
     public void editarInmueble(){
-        Stage stage;
-        FXMLLoader fxmlLoader;
-        MoldInmuebleController moldController;
-        Inmueble inmueble;
-
-        if(seleccionado.get().isBlank()){
-            showReport("Selecciona un inmueble.",2);
-        }else{
-            inmueble = InmuebleDAO.getInmuebleByIdFromDB(seleccionado.get());
+        Task<Inmueble> task = new Task<Inmueble>() {
+            @Override
+            protected Inmueble call() throws Exception {
+                return InmuebleDAO.getInmuebleByIdFromDB(seleccionado.get());
+            }
+        };
+        task.setOnSucceeded(ee->{
+            Stage stage;
+            FXMLLoader fxmlLoader;
+            MoldInmuebleController moldController;
+            Inmueble inmueble;
+            inmueble = task.getValue();
             if(inmueble == null){
                 showReport("Inmueble no encontrado.",2);
             }else{
@@ -297,44 +343,70 @@ public class MainInmueblesController {
                 showReport(msgFromMoldInmueble,2);
                 updateTableViewInmuebles();
             }
+        });
+        if(seleccionado.get().isBlank()){
+            showReport("Selecciona un inmueble.",2);
+        }else{
+            exec.execute(task);
         }
     }
 
     @FXML
     public void borrarInmueble(){
-        boolean removed = false;
-
-        if(seleccionado.get().isBlank()){
-            showReport("Selecciona un inmueble.",2);
-        }else{
-            removed = InmuebleDAO.removeInmuebleByIdInDB(seleccionado.get());
-            if(removed){
+        Task<Boolean> task = new Task<Boolean>() {
+            @Override
+            protected Boolean call() throws Exception {
+                return InmuebleDAO.removeInmuebleByIdInDB(seleccionado.get());
+            }
+        };
+        task.setOnSucceeded(e->{
+            if(task.getValue()){
                 showReport("Inmueble eliminado correctamente.",2);
                 updateTableViewInmuebles();
                 tf_seleccionado.clear();
             }else{
                 showReport("Fallo al eliminar inmueble.",2);
             }
+        });
+        task.setOnFailed(e-> task.getException().printStackTrace());
+
+        if(seleccionado.get().isBlank()){
+            showReport("Selecciona un inmueble.",2);
+        }else{
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "¿Estás" +
+                    " seguro del borrado del inmueble con id "+seleccionado.get()+ "?",
+                    ButtonType.YES,ButtonType.NO);
+            alert.setHeaderText(null);
+            alert.showAndWait();
+            if(alert.getResult() == ButtonType.YES){
+                exec.execute(task);
+            }
         }
     }
 
     @FXML
     public void verAlquileresInmueble(){
-        Stage stage;
-        FXMLLoader fxmlLoader;
-        MainAquileresController alquileresController;
-        Inmueble inmueble;
+        Task<Inmueble> task = new Task<Inmueble>() {
+            @Override
+            protected Inmueble call() throws Exception {
+                return InmuebleDAO.getInmuebleByIdFromDB(seleccionado.get());
+            }
+        };
 
-        if(seleccionado.get().isBlank()){
-            showReport("Selecciona un inmueble.",2);
-        }else{
-            inmueble = InmuebleDAO.getInmuebleByIdFromDB(seleccionado.get());
+        task.setOnSucceeded(ee->{
+            Stage stage;
+            FXMLLoader fxmlLoader;
+            MainAquileresController alquileresController;
+            Inmueble inmueble;
+            inmueble = task.getValue();
             if(inmueble == null){
                 showReport("Inmueble no encontrado.",2);
             }else{
                 stage = new Stage();
                 fxmlLoader = new FXMLLoader(MainApp.class.getResource("main-alquileres-view.fxml"));
                 stage.setTitle("Alquileres: "+inmueble.getTitulo());
+                stage.setMinHeight(600);
+                stage.setMinWidth(900);
                 try {
                     stage.setScene(new Scene(fxmlLoader.load()));
                 } catch (IOException e) {
@@ -347,6 +419,12 @@ public class MainInmueblesController {
                 stage.showAndWait();
                 updateTableViewInmuebles();
             }
+        });
+
+        if(seleccionado.get().isBlank()){
+            showReport("Selecciona un inmueble.",2);
+        }else{
+            exec.execute(task);
         }
     }
 

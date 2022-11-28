@@ -47,6 +47,8 @@ public class Inmueble {
     @JsonAdapter(IntegerPropertyAdapter.class)
     public IntegerProperty bannos;
 
+
+
     public Inmueble(long idInmueble, String titulo,
                     float precio, String descripcion,
                     int metrosConstruidos,
