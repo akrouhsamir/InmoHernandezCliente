@@ -475,8 +475,11 @@ public class MainInmueblesController {
         tv_inmuebles.setRowFactory(tv -> {
             TableRow<Inmueble> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
+                long a = row.getItem().getId();
                 if(event.getClickCount()==2 && (!row.isEmpty())){
-                    tf_seleccionado.setText(row.getItem().getId()+"");
+                    editarInmueble();
+                }else{
+                    tf_seleccionado.setText(a+"");
                 }
             });
             return row;
