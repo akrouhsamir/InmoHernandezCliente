@@ -89,7 +89,7 @@
             <Insets left="15.0" top="10.0" />
          </GridPane.margin>
       </Label>
-      <TextField fx:id="tf_ubicacion" GridPane.columnIndex="3" GridPane.rowIndex="4">
+      <TextField id="tfUbicacion" fx:id="tf_ubicacion" GridPane.columnIndex="3" GridPane.rowIndex="4">
          <GridPane.margin>
             <Insets right="30.0" top="10.0" />
          </GridPane.margin>
@@ -102,12 +102,12 @@
             <Insets left="45.0" top="10.0" />
          </GridPane.margin>
       </Label>
-      <Spinner fx:id="spinner_habitaciones" GridPane.columnIndex="1" GridPane.rowIndex="5">
+      <Spinner id="spinnerHabitaciones" fx:id="spinner_habitaciones" GridPane.columnIndex="1" GridPane.rowIndex="5">
          <GridPane.margin>
             <Insets right="70.0" top="10.0" />
          </GridPane.margin>
       </Spinner>
-      <Spinner fx:id="spinner_bannos" GridPane.columnIndex="3" GridPane.rowIndex="5">
+      <Spinner id="spinnerBannos" fx:id="spinner_bannos" GridPane.columnIndex="3" GridPane.rowIndex="5">
          <GridPane.margin>
             <Insets right="70.0" top="10.0" />
          </GridPane.margin>
@@ -120,7 +120,7 @@
             <Insets left="15.0" top="10.0" />
          </GridPane.margin>
       </Label>
-      <TextArea fx:id="ta_descripcion" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="4" GridPane.rowIndex="9">
+      <TextArea id="taDescripcion" fx:id="ta_descripcion" prefHeight="200.0" prefWidth="200.0" GridPane.columnSpan="4" GridPane.rowIndex="9">
          <GridPane.margin>
             <Insets left="30.0" right="20.0" top="10.0" />
          </GridPane.margin>
@@ -147,7 +147,7 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Button fx:id="btn_mod" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#modInmueble" prefHeight="35.0" style="-fx-background-color: #6fb058;" text="Crear">
+            <Button id="btnCrearInmueble" fx:id="btn_mod" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#modInmueble" prefHeight="35.0" style="-fx-background-color: #6fb058;" text="Crear">
                <GridPane.margin>
                   <Insets bottom="10.0" left="30.0" right="20.0" top="10.0" />
                </GridPane.margin>
@@ -181,12 +181,12 @@
             <Insets left="15.0" top="10.0" />
          </GridPane.margin>
       </Label>
-      <TextField fx:id="tf_m2" GridPane.columnIndex="1" GridPane.rowIndex="6">
+      <TextField id="tfMetros" fx:id="tf_m2" GridPane.columnIndex="1" GridPane.rowIndex="6">
          <GridPane.margin>
             <Insets right="70.0" top="10.0" />
          </GridPane.margin>
       </TextField>
-      <TextField fx:id="tf_m2utiles" GridPane.columnIndex="3" GridPane.rowIndex="6">
+      <TextField id="tfMetrosUtiles" fx:id="tf_m2utiles" GridPane.columnIndex="3" GridPane.rowIndex="6">
          <GridPane.margin>
             <Insets right="70.0" top="10.0" />
          </GridPane.margin>
