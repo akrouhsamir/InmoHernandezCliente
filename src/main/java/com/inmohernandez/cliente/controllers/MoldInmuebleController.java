@@ -262,15 +262,11 @@ public class MoldInmuebleController {
         if(m2utiles.get().isBlank()){
             tf_m2utiles.setText(m2.get());
         }
-        if(publicacion.get().equals("null")){
+        if(publicacion.get().equals("null") || publicacion.get().isBlank()){
             report.setText("La fecha de publicación está vacía");
             correcto = false;
         }
 
-        if (zona.get().equals("Todas las zonas")) {
-            report.setText("Seleccione una zona");
-            correcto = false;
-        }
 
         return correcto;
     }
