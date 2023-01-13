@@ -353,14 +353,14 @@ public class MainInmueblesController {
 
     @FXML
     public void borrarInmueble(){
-        Task<Boolean> task = new Task<Boolean>() {
+        Task<Integer> task = new Task<Integer>() {
             @Override
-            protected Boolean call() throws Exception {
+            protected Integer call() throws Exception {
                 return InmuebleDAO.removeInmuebleByIdInDB(seleccionado.get());
             }
         };
         task.setOnSucceeded(e->{
-            if(task.getValue()){
+            if(task.getValue()==1){
                 showReport("Inmueble eliminado correctamente.",2);
                 updateTableViewInmuebles();
                 tf_seleccionado.clear();

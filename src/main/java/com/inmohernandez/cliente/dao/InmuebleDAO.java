@@ -6,6 +6,9 @@ import com.inmohernandez.cliente.models.Inmueble;
 import com.inmohernandez.cliente.utils.Utils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -96,15 +99,18 @@ public class InmuebleDAO {
         return result;
     }
 
-    public static boolean removeInmuebleByIdInDB(String id){
+    public static int removeInmuebleByIdInDB(String id){
         HttpURLConnection connection;
-        boolean result=false;
+        BufferedReader br;
+        int result=-1;
         try {
             connection = (HttpURLConnection) new URL(ROOTAPI + id).openConnection();
             connection.setRequestMethod("DELETE");
             connection.connect();
             if (connection.getResponseCode() == 200){
-                result = true;
+                br = new BufferedReader(new BufferedReader(new InputStreamReader(connection.getInputStream())));
+                result = Integer.parseInt(br.readLine());
+                br.close();
             }
             connection.disconnect();
         } catch (IOException e) {
