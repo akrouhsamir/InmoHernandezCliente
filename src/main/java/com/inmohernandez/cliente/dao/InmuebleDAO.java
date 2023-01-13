@@ -73,10 +73,13 @@ public class InmuebleDAO {
         return inmueble;
     }
 
-    public static boolean postInmuebleByIdInDB(String id, String bodyJson){
+    public static Inmueble postInmuebleByIdInDB(String id, String bodyJson){
         URL url;
         HttpURLConnection connection;
-        boolean result = false;
+        InputStreamReader isr;
+        JsonObject jsonInmueble;
+        Inmueble inmueble=null;
+        int result = -1;
         try {
             url = new URL(ROOTAPI + (id == null ? "": id));
             connection = (HttpURLConnection) url.openConnection();
@@ -88,7 +91,10 @@ public class InmuebleDAO {
             connection.getOutputStream().close();
             connection.connect();
             if (connection.getResponseCode() == 200) {
-                result = true;
+                isr = new InputStreamReader(connection.getInputStream());
+                jsonInmueble = JsonParser.parseReader(isr).getAsJsonObject();
+                isr.close();
+                inmueble = new Gson().fromJson(jsonInmueble, Inmueble.class);
             }
             connection.disconnect();
         } catch (MalformedURLException e) {
@@ -96,7 +102,7 @@ public class InmuebleDAO {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return result;
+        return inmueble;
     }
 
     public static int removeInmuebleByIdInDB(String id){

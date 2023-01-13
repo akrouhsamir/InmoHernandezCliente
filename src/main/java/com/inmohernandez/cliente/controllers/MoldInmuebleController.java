@@ -222,14 +222,14 @@ public class MoldInmuebleController {
             sb.append("\"habitaciones\" : " + habitaciones.get() + ", ");
             sb.append("\"bannos\" : " + bannos.get());
             sb.append("}");
-            Task<Boolean> task = new Task<Boolean>() {
+            Task<Inmueble> task = new Task<Inmueble>() {
                 @Override
-                protected Boolean call() throws Exception {
+                protected Inmueble call() throws Exception {
                     return InmuebleDAO.postInmuebleByIdInDB(inmueble == null ? null:String.valueOf(inmueble.getId()),sb.toString());
                 }
             };
             task.setOnSucceeded(e->{
-                if(task.getValue()){
+                if(task.getValue()!= null){
                     myStage.close();
                     mainController.setMsgFromMoldInmueble("Inmueble " + ((inmueble == null) ? "creado": "editado") + " correctamente");
                 }else{
