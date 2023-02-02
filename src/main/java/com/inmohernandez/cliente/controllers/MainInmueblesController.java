@@ -21,7 +21,10 @@ import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import net.sf.jasperreports.engine.JRException;
+
 import java.io.IOException;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -285,7 +288,35 @@ public class MainInmueblesController {
         exec.execute(task);
     }
 
+    @FXML
+    public void crearReporte(){
+        try{
+            int inmuebleReporte = Integer.parseInt(seleccionado.get());
+            new ReportInmuebles().showReportConSubreport(inmuebleReporte);
+        }catch (NumberFormatException a){
+            showReport("Selecciona un inmueble", 1800);
+        } catch (JRException e) {
+            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
 
+    }
+
+    @FXML
+    public void crearReporteGeneral(){
+        try {
+            new ReportInmuebles().showReport();
+        } catch (JRException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 
     @FXML

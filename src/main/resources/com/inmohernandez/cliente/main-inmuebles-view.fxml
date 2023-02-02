@@ -16,7 +16,7 @@
   <columnConstraints>
       <ColumnConstraints hgrow="NEVER" maxWidth="110.0" minWidth="10.0" prefWidth="110.0" />
       <ColumnConstraints hgrow="NEVER" maxWidth="180.0" minWidth="10.0" prefWidth="180.0" />
-      <ColumnConstraints hgrow="NEVER" maxWidth="290.0" minWidth="10.0" prefWidth="290.0" />
+      <ColumnConstraints hgrow="NEVER" maxWidth="370.0" minWidth="370.0" prefWidth="370.0" />
       <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="100.0" />
   </columnConstraints>
   <rowConstraints>
@@ -31,7 +31,7 @@
     <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
       <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
       <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES" />
-      <RowConstraints maxHeight="60.0" minHeight="10.0" prefHeight="60.0" vgrow="NEVER" />
+      <RowConstraints maxHeight="80.0" minHeight="10.0" prefHeight="80.0" vgrow="NEVER" />
       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -132,6 +132,7 @@
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
         </columnConstraints>
         <rowConstraints>
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -173,6 +174,11 @@
                   <Font name="Tw Cen MT" size="16.0" />
                </font>
             </Button>
+            <Button id="btnReportes" fx:id="btnReportes" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#crearReporte" text="📄 Reporte" GridPane.columnIndex="5">
+               <font>
+                  <Font name="Tw Cen MT" size="16.0" />
+               </font>
+            </Button>
          </children>
       </GridPane>
       <GridPane GridPane.columnSpan="2" GridPane.rowIndex="11">
@@ -181,10 +187,12 @@
           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
         </columnConstraints>
         <rowConstraints>
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="0.0" vgrow="SOMETIMES" />
+          <RowConstraints minHeight="10.0" prefHeight="0.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Button fx:id="btn_limpiar" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clickLimpiarFiltros" text="Limpiar filtros" GridPane.columnIndex="1" GridPane.valignment="BOTTOM">
+            <Button fx:id="btn_limpiar" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clickLimpiarFiltros" text="Limpiar filtros" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.valignment="BOTTOM">
                <GridPane.margin>
                   <Insets left="20.0" right="10.0" />
                </GridPane.margin>
@@ -192,7 +200,7 @@
                   <Font name="Tw Cen MT" size="15.0" />
                </font>
             </Button>
-            <Button fx:id="btn_filtrar" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clickAplicarFiltros" text="Aplicar filtros" GridPane.valignment="BOTTOM">
+            <Button fx:id="btn_filtrar" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clickAplicarFiltros" text="Aplicar filtros" GridPane.rowIndex="1" GridPane.valignment="BOTTOM">
                <GridPane.margin>
                   <Insets left="30.0" />
                </GridPane.margin>
@@ -200,7 +208,18 @@
                   <Font name="Tw Cen MT" size="15.0" />
                </font>
             </Button>
+            <Button maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#crearReporteGeneral" text="📄 Reporte general" GridPane.columnSpan="2" GridPane.rowIndex="2">
+               <GridPane.margin>
+                  <Insets left="30.0" right="10.0" top="10.0" />
+               </GridPane.margin>
+               <font>
+                  <Font name="Tw Cen MT" size="16.0" />
+               </font>
+            </Button>
          </children>
+         <GridPane.margin>
+            <Insets top="20.0" />
+         </GridPane.margin>
       </GridPane>
       <Label id="report" fx:id="report" GridPane.columnSpan="2" GridPane.rowIndex="12" GridPane.valignment="TOP">
          <font>

@@ -3,6 +3,9 @@ module com.inmohernandez.cliente {
     requires javafx.fxml;
     requires com.google.gson;
     requires java.sql;
+    requires jasperreports;
+    requires org.mariadb.jdbc;
+    requires java.desktop;
 
 
     opens com.inmohernandez.cliente.models to javafx.base, com.google.gson;

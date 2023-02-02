@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.18.1.final using JasperReports Library version 6.18.1-9d75d1969e774d4f179fb3be8401e98a0e6d1611  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="InmuebleMain" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="2d1560f2-773d-48ad-9567-2bcea6eb866e">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Noinch"/>
+	<parameter name="CodInmuebleMain" class="java.lang.Integer"/>
+	<parameter name="Subreport" class="net.sf.jasperreports.engine.JasperReport"/>
+	<queryString language="SQL">
+		<![CDATA[SELECT id_inmueble,
+	titulo,
+	precio,
+	descripcion,
+	metros_construidos,
+	metros_utiles,
+	ubicacion,
+	zona,
+	fecha_publicacion,
+	habitaciones,
+	bannos
+FROM inmohernandezdb.inmuebles
+WHERE id_inmueble =  $P{CodInmuebleMain}]]>
+	</queryString>
+	<field name="id_inmueble" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="id_inmueble"/>
+		<property name="com.jaspersoft.studio.field.label" value="id_inmueble"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="inmuebles"/>
+	</field>
+	<field name="titulo" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="titulo"/>
+		<property name="com.jaspersoft.studio.field.label" value="titulo"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="inmuebles"/>
+	</field>
+	<field name="precio" class="java.lang.Float">
+		<property name="com.jaspersoft.studio.field.name" value="precio"/>
+		<property name="com.jaspersoft.studio.field.label" value="precio"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="inmuebles"/>
+	</field>
+	<field name="descripcion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="descripcion"/>
+		<property name="com.jaspersoft.studio.field.label" value="descripcion"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="inmuebles"/>
+	</field>
+	<field name="metros_construidos" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="metros_construidos"/>
+		<property name="com.jaspersoft.studio.field.label" value="metros_construidos"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="inmuebles"/>
+	</field>
+	<field name="metros_utiles" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="metros_utiles"/>
+		<property name="com.jaspersoft.studio.field.label" value="metros_utiles"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="inmuebles"/>
+	</field>
+	<field name="ubicacion" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="ubicacion"/>
+		<property name="com.jaspersoft.studio.field.label" value="ubicacion"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="inmuebles"/>
+	</field>
+	<field name="zona" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="zona"/>
+		<property name="com.jaspersoft.studio.field.label" value="zona"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="inmuebles"/>
+	</field>
+	<field name="fecha_publicacion" class="java.sql.Date">
+		<property name="com.jaspersoft.studio.field.name" value="fecha_publicacion"/>
+		<property name="com.jaspersoft.studio.field.label" value="fecha_publicacion"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="inmuebles"/>
+	</field>
+	<field name="habitaciones" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="habitaciones"/>
+		<property name="com.jaspersoft.studio.field.label" value="habitaciones"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="inmuebles"/>
+	</field>
+	<field name="bannos" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="bannos"/>
+		<property name="com.jaspersoft.studio.field.label" value="bannos"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="inmuebles"/>
+	</field>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="137" splitType="Stretch">
+			<image>
+				<reportElement x="0" y="0" width="90" height="88" uuid="c0a77086-00ea-4409-9610-655b5e618119"/>
+				<imageExpression><![CDATA["src/main/resources/com/inmohernandez/cliente/imgs/rhinoapp.png"]]></imageExpression>
+			</image>
+			<textField>
+				<reportElement x="100" y="0" width="459" height="30" forecolor="#07A3EB" uuid="2707715a-2396-404b-9ce0-05ee53fa7b9c"/>
+				<textElement>
+					<font size="18" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{titulo}]]></textFieldExpression>
+			</textField>
+			<textField pattern="#,##0.00 €">
+				<reportElement x="150" y="30" width="100" height="30" forecolor="#1AA1DB" uuid="d74649b8-2dde-4372-9816-c8bb500a0d28"/>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{precio}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="100" y="30" width="50" height="30" uuid="c179d73e-29ea-4c90-a6b3-f000c0c531a6"/>
+				<textElement>
+					<font size="14"/>
+				</textElement>
+				<text><![CDATA[Precio: ]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="368" y="30" width="92" height="30" uuid="2eaaf298-f46c-43dd-965d-a689bc94339a"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Fecha publicación: ]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="100" y="60" width="60" height="30" forecolor="#14BADB" uuid="1dd8bb3d-2d7e-4586-812e-3d23a9865b55"/>
+				<textElement>
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{zona}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="160" y="60" width="230" height="30" uuid="20774485-6a2f-41ca-a862-49127f346617"/>
+				<textFieldExpression><![CDATA[$F{ubicacion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="460" y="30" width="100" height="30" uuid="3c97c8f2-640b-4b75-83c2-540f28a09e13"/>
+				<textFieldExpression><![CDATA[new java.text.SimpleDateFormat("dd/MM/yyyy").format($F{fecha_publicacion})]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="100" y="88" width="459" height="30" uuid="871e07a1-ed80-4f8b-9a19-7c1252cb514c"/>
+				<textFieldExpression><![CDATA["Habitaciones: " + $F{habitaciones} + " \tBaños: " + $F{bannos} + " \tMetros2: " + $F{metros_construidos} + " \tMetros útiles: " +$F{metros_utiles}]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="3" y="130" width="549" height="1" uuid="cc276721-0ee1-4d6e-89ab-8c3d4bebb7b4"/>
+			</line>
+		</band>
+	</title>
+	<detail>
+		<band height="82" splitType="Stretch">
+			<subreport>
+				<reportElement x="10" y="10" width="443" height="45" uuid="d4c6de2b-2f12-4a4b-a82f-a7e0bbcf3030"/>
+				<subreportParameter name="CodInmueble">
+					<subreportParameterExpression><![CDATA[$F{id_inmueble}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{Subreport}]]></subreportExpression>
+			</subreport>
+		</band>
+	</detail>
+</jasperReport>
